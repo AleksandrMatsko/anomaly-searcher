@@ -1,0 +1,9 @@
+redis:
+  host: "localhost"
+  port: 6379
+  username: ""
+  password: ""
+rules:
+  - id: test-rule-1
+    metric_source_type: PROMETHEUS
+    query: "http_requests_total"
