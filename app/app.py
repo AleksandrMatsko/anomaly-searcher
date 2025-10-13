@@ -1,25 +1,42 @@
 import asyncio
 import concurrent.futures
 import logging
+import typing
+import datetime
 
 import app.config as config
 import app.rules as rules
+import app.metrics as metrics
 
 class App:
     __cfg : config.AppConfig
     __rules_provider : rules.RulesProvider
+    __metric_sources : typing.Dict[metrics.MetricSourceType, metrics.MetricSource]
     __logger : logging.Logger
 
     def __init__(self, cfg : config.AppConfig) -> None:
         self.__cfg = cfg
         self.__rules_provider = rules.ConfigRulesProvider(cfg_rules=self.__cfg.rules)
         self.__logger = logging.getLogger(__name__)
+        self.__metric_sources = metrics.init_metric_sources_from_configs(cfg.metric_sources)
 
     async def __get_rules(self):
         return await self.__rules_provider.get_rules()
     
-    async def __get_metrics(self, query : str) -> list:
-        # TODO
+    async def __get_metrics(self, src_type : metrics.MetricSourceType,  query : str) -> list:
+        src = self.__metric_sources.get(src_type)
+        if src is None:
+            raise metrics.UnknownMetricSourceError(src_type)
+
+        res = await src.query(
+            query=query,
+            interval_start=datetime.datetime.now() - datetime.timedelta(hours=1),
+            interval_end=datetime.datetime.now(),
+            step="1m",
+        )
+
+        print(res)
+
         return []
     
     async def __process_single_metric(self, metric, executor : concurrent.futures.Executor) -> dict:
@@ -37,7 +54,7 @@ class App:
         return {}
 
     async def __process_metrics(self, rule : rules.Rule, executor : concurrent.futures.Executor):
-        get_metrics_task = asyncio.create_task(self.__get_metrics(rule.query))
+        get_metrics_task = asyncio.create_task(self.__get_metrics(rule.metric_source_type, rule.query))
         await get_metrics_task
 
         tasks = []
@@ -72,7 +89,7 @@ class App:
                         task.add_done_callback(background_tasks.discard)
 
                     # TODO: move sleep delay to config.
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(60)
             except asyncio.CancelledError:
                 self.__logger.info("cancelled")
             finally:

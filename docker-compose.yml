@@ -7,3 +7,10 @@ services:
       - "6379:6379"
     restart: always
 
+  prometheus:
+    image: prom/prometheus:v3.6.0
+    ports:
+      - "9090:9090"
+
+volumes:
+  data:
