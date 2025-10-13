@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 import datetime
 
+from .metric import Metric
+
 class MetricSourceType(StrEnum):
     UNKNOWN = ""
     PROMETHEUS = "PROMETHEUS"
@@ -16,7 +18,7 @@ class MetricSource(ABC):
               interval_start : datetime.datetime,
               interval_end : datetime.datetime,
               step : str,
-              additional_params : dict = {}) -> dict:
+              additional_params : dict = {}) -> list[Metric]:
         pass
 
     

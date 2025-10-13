@@ -35,11 +35,9 @@ class App:
             step="1m",
         )
 
-        print(res)
-
-        return []
+        return res
     
-    async def __process_single_metric(self, metric, executor : concurrent.futures.Executor) -> dict:
+    async def __process_single_metric(self, metric : metrics.Metric, executor : concurrent.futures.Executor) -> dict:
         # TODO:
         # 1. Get model from db
         # 2. Get anomaly prediction based for time series

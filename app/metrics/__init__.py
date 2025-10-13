@@ -12,6 +12,11 @@ from .metric_source import (
     MetricSourceType,
 )
 
+from .metric import (
+    MetricValue,
+    Metric,
+)
+
 from .prometheus_metric_source import (
     PrometheusMetricSource,
 )

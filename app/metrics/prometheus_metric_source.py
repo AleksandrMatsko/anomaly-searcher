@@ -4,6 +4,7 @@ import asyncio
 
 from .metric_source import MetricSource, MetricSourceType
 from .exceptions import *
+from .metric import *
 
 class PrometheusMetricSource(MetricSource):
     __prom : pac.PrometheusConnect
@@ -23,13 +24,39 @@ class PrometheusMetricSource(MetricSource):
         self.__TIMEOUT = timeout
         if not self.__prom.check_prometheus_connection():
             raise MetricSourceUnreachableError(MetricSourceType.PROMETHEUS)
+        
+    def __get_metric_name(self, metric_dict : dict) -> str:
+        name = metric_dict.pop("__name__")
+        labels = []
+
+        for k in metric_dict:
+            labels.append(f'{k}="{metric_dict[k]}"')
+
+        return name + "{" + ",".join(labels) + "}"
+        
+        
+    def __decode_into_metric_list(self, rsp : list[dict]) -> list[Metric]:
+        metrics = []
+
+        for d in rsp:
+            name = self.__get_metric_name(d["metric"])
+
+            metric_values = []
+            for v in d["values"]:
+                metric_values.append(
+                    MetricValue(v[0], float(v[1]))
+                )
+
+            metrics.append(Metric(name, metric_values))
+
+        return metrics
 
     async def query(self, 
               query : str,
               interval_start : datetime.datetime,
               interval_end : datetime.datetime,
               step : str,
-              additional_params : dict = {}) -> dict:
+              additional_params : dict = {}) -> list[Metric]:
         tsk = asyncio.to_thread(self.__prom.custom_query_range,
             query=query,
             start_time=interval_start,
@@ -39,8 +66,9 @@ class PrometheusMetricSource(MetricSource):
             params=additional_params
         )
 
-        return await tsk
+        res = await tsk
         
+        return self.__decode_into_metric_list(res)
 
 def  init_prometheus_metric_source_from_cnfg_(args : dict) -> PrometheusMetricSource:
     prometheus_url = args.get("prometheus_url")
