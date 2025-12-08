@@ -58,35 +58,11 @@ class App:
 
         return res
     
-    # def __process_single_metric_task(self, 
-    #                                        metric : metrics.Metric, 
-    #                                        model_type : model.ModelType,
-    #                                        ) -> dict: 
-    #     detector = self.__model_storage.get_model(metric.name)
-    #     if detector is None:
-    #         detector = model.get_model_by_type(model_type)
-        
-    #     is_anomaly = detector.predict_one(metric)
-
-    #     self.__model_storage.save_model(metric.name, detector)
-
-    #     return {
-    #         "metric_name": metric.name,
-    #         "is_anomaly": is_anomaly,
-    #     }
-    
     async def __process_single_metric(self, 
                                       metric : metrics.Metric, 
                                       executor : concurrent.futures.Executor,
                                       model_type : model.ModelType,
                                       ) -> dict:
-        # TODO:
-        # 1. Get model from db
-        # 2. Get anomaly prediction based for time series
-        # 3. Learn on datapoints
-        # 4. Save updated model
-        # 5. Return dict of metric name and if there anomaly
-
         loop = asyncio.get_running_loop()
 
         task = loop.run_in_executor(executor, process_single_metric_task, self.__model_storage, metric, model_type)
