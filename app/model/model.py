@@ -6,5 +6,5 @@ import app.metrics as metrics
 class AnomalyDetectionModel(ABC):
 
     @abstractmethod
-    def predict_one(self, metric : metrics.Metric):
+    def predict_one(self, metric : metrics.Metric) -> bool:
         pass

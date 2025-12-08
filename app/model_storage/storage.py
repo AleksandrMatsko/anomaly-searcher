@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from model import AnomalyDetectionModel
+
+from app.model import AnomalyDetectionModel
 
 class ModelStorage(ABC):
     @abstractmethod
@@ -7,5 +8,5 @@ class ModelStorage(ABC):
         pass
     
     @abstractmethod
-    def get_model(self, key : str) -> AnomalyDetectionModel:
+    def get_model(self, key : str) -> (AnomalyDetectionModel | None):
         pass
