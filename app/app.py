@@ -7,11 +7,31 @@ import datetime
 import app.config as config
 import app.rules as rules
 import app.metrics as metrics
+import app.model_storage as model_storage
+import app.model as model
+
+def process_single_metric_task(storage : model_storage.ModelStorage,
+                               metric : metrics.Metric, 
+                               model_type : model.ModelType,
+                               ) -> dict:
+    detector = storage.get_model(metric.name)
+    if detector is None:
+        detector = model.get_model_by_type(model_type)
+        
+    is_anomaly = detector.predict_one(metric)
+
+    storage.save_model(metric.name, detector)
+
+    return {
+        "metric_name": metric.name,
+        "is_anomaly": is_anomaly,
+    }
 
 class App:
     __cfg : config.AppConfig
     __rules_provider : rules.RulesProvider
     __metric_sources : typing.Dict[metrics.MetricSourceType, metrics.MetricSource]
+    __model_storage : model_storage.ModelStorage
     __logger : logging.Logger
 
     def __init__(self, cfg : config.AppConfig) -> None:
@@ -19,6 +39,7 @@ class App:
         self.__rules_provider = rules.ConfigRulesProvider(cfg_rules=self.__cfg.rules)
         self.__logger = logging.getLogger(__name__)
         self.__metric_sources = metrics.init_metric_sources_from_configs(cfg.metric_sources)
+        self.__model_storage = model_storage.InMemoryStorage()
 
     async def __get_rules(self):
         return await self.__rules_provider.get_rules()
@@ -37,19 +58,17 @@ class App:
 
         return res
     
-    async def __process_single_metric(self, metric : metrics.Metric, executor : concurrent.futures.Executor) -> dict:
-        # TODO:
-        # 1. Get model from db
-        # 2. Get anomaly prediction based for time series
-        # 3. Learn on datapoints
-        # 4. Save updated model
-        # 5.
-
+    async def __process_single_metric(self, 
+                                      metric : metrics.Metric, 
+                                      executor : concurrent.futures.Executor,
+                                      model_type : model.ModelType,
+                                      ) -> dict:
         loop = asyncio.get_running_loop()
 
-        # loop.run_in_executor(executor, func, args...)
+        task = loop.run_in_executor(executor, process_single_metric_task, self.__model_storage, metric, model_type)
+        await task
 
-        return {}
+        return task.result()
 
     async def __process_metrics(self, rule : rules.Rule, executor : concurrent.futures.Executor):
         get_metrics_task = asyncio.create_task(self.__get_metrics(rule.metric_source_type, rule.query))
@@ -59,9 +78,14 @@ class App:
 
         metrics_list = get_metrics_task.result()
         for metric in metrics_list:
-            tasks.append(asyncio.create_task(self.__process_single_metric(metric, executor)))
+            tasks.append(asyncio.create_task(self.__process_single_metric(metric, executor, rule.model_type)))
 
         results = await asyncio.gather(*tasks, return_exceptions=False)
+
+        for res in results:
+            if isinstance(res, dict) and res.get("is_anomaly"):
+                self.__logger.info(f"metric: {res.get("metric_name")} has anomaly")
+                # TODO: send to alert manager
 
     def shutdown(self):
         pass
