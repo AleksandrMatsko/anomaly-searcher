@@ -3,7 +3,12 @@ redis:
   port: 6379
   username: ""
   password: ""
+metric_sources:
+  - metric_source_type: PROMETHEUS
+    metric_source_params:
+      prometheus_url: "http://localhost:9090"
+      timeout: 20
 rules:
   - id: test-rule-1
     metric_source_type: PROMETHEUS
-    query: "http_requests_total"
+    query: "promhttp_metric_handler_requests_total"

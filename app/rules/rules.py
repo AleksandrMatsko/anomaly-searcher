@@ -1,11 +1,7 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from enum import StrEnum
+from dataclasses import dataclass
 
-class MetricSourceType(StrEnum):
-    UNKNOWN = ""
-    PROMETHEUS = "prometheus"
-
+from app.metrics import MetricSourceType
 
 @dataclass
 class Rule:
@@ -14,7 +10,7 @@ class Rule:
     id : str = ""
 
 
-class RulesProvider:
+class RulesProvider(ABC):
     @abstractmethod
     async def get_rules(self) -> list[Rule]:
         pass
