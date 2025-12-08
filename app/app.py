@@ -12,7 +12,7 @@ import app.model as model
 
 def process_single_metric_task(storage : model_storage.ModelStorage,
                                metric : metrics.Metric, 
-                                model_type : model.ModelType,
+                               model_type : model.ModelType,
                                ) -> dict:
     detector = storage.get_model(metric.name)
     if detector is None:
@@ -83,7 +83,7 @@ class App:
         results = await asyncio.gather(*tasks, return_exceptions=False)
 
         for res in results:
-            if res.get("is_anomaly"):
+            if isinstance(res, dict) and res.get("is_anomaly"):
                 self.__logger.info(f"metric: {res.get("metric_name")} has anomaly")
                 # TODO: send to alert manager
 

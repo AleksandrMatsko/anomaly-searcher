@@ -1,6 +1,5 @@
-
-
 from app.model.model import AnomalyDetectionModel
+
 from .storage import ModelStorage
 
 class InMemoryStorage(ModelStorage):
