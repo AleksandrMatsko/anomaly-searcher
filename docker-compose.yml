@@ -12,5 +12,17 @@ services:
     ports:
       - "9090:9090"
 
+  alertmanager:
+    image: prom/alertmanager:v0.30.1
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./local/alertmanager/:/etc/alertmanager/
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yaml
+      - --enable-feature=utf8-strict-mode
+      - --log.level=debug
+    
+
 volumes:
   data:
