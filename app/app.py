@@ -9,6 +9,7 @@ import app.rules as rules
 import app.metrics as metrics
 import app.model_storage as model_storage
 import app.model as model
+import app.alert as alert
 
 def process_single_metric_task(storage : model_storage.ModelStorage,
                                metric : metrics.Metric, 
@@ -23,7 +24,7 @@ def process_single_metric_task(storage : model_storage.ModelStorage,
     storage.save_model(metric.name, detector)
 
     return {
-        "metric_name": metric.name,
+        "metric": metric,
         "is_anomaly": is_anomaly,
     }
 
@@ -32,6 +33,7 @@ class App:
     __rules_provider : rules.RulesProvider
     __metric_sources : typing.Dict[metrics.MetricSourceType, metrics.MetricSource]
     __model_storage : model_storage.ModelStorage
+    __alerter : alert.Alerter
     __logger : logging.Logger
 
     def __init__(self, cfg : config.AppConfig) -> None:
@@ -40,6 +42,7 @@ class App:
         self.__logger = logging.getLogger(__name__)
         self.__metric_sources = metrics.init_metric_sources_from_configs(cfg.metric_sources)
         self.__model_storage = model_storage.InMemoryStorage()
+        self.__alerter = alert.alerter_from_config(cfg=cfg.alerter)
 
     async def __get_rules(self):
         return await self.__rules_provider.get_rules()
@@ -83,9 +86,11 @@ class App:
         results = await asyncio.gather(*tasks, return_exceptions=False)
 
         for res in results:
-            if isinstance(res, dict) and res.get("is_anomaly"):
-                self.__logger.info(f"metric: {res.get("metric_name")} has anomaly")
-                # TODO: send to alert manager
+            # TODO: understand if alert is recovery or not ?
+
+            if isinstance(res, dict) and res.get("is_anomaly", False):
+                self.__logger.info(f"metric: {res["metric"]} has anomaly")
+                self.__alerter.send_alert(rule=rule, metric=res["metric"])
 
     def shutdown(self):
         pass
