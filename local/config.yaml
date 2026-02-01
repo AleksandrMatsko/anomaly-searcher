@@ -11,4 +11,11 @@ metric_sources:
 rules:
   - id: test-rule-1
     metric_source_type: PROMETHEUS
+    # TODO: allow using key created out of metric labels and values, to not lose
+    # the trained model, on some label value change (for example: pod_name). 
     query: "promhttp_metric_handler_requests_total"
+    # TODO: allow expand label and annotation values with label value of metric.
+    labels:
+      test: alert
+    annotations:
+      description: test alerting rule

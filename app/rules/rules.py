@@ -1,3 +1,5 @@
+import typing
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
@@ -10,6 +12,8 @@ class Rule:
     model_type : ModelType = ModelType.UNKNOWN
     query : str = ""
     id : str = ""
+    labels : typing.Dict[str, str] = {}
+    annotations : typing.Dict[str, str] = {}
 
 
 class RulesProvider(ABC):
