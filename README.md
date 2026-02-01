@@ -17,7 +17,7 @@ You can obtain `chat_id` it by accessing `https://api.telegram.org/bot{your_bot_
     ```
 
 5. In your telegram chat write and send:
-> @your_bot_id /start
+    > @your_bot_id /start
 
 6. (Optionally) Test that alertmanager well configured, by adding alert with amtool.
     ```shell
