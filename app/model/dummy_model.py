@@ -1,20 +1,28 @@
-import random
-
 from app.metrics.metric import Metric
 
 from .model import AnomalyDetectionModel
 
 class DummyAnomalyDetector(AnomalyDetectionModel):
-    """Randomly tells that datapoint is anomaly with probability chance / total_chances"""
-    __chance : int
-    __total_chances : int
+    """Tells that anomaly for anomaly_count times. When tells no anomaly for non_anomaly_count times."""
+    __anomaly_count : int
+    __non_anomaly_count : int
+    __window_size : int
+    __state : int
 
     def __init__(self, 
-                 chance : int = 1,
-                 total_chances : int = 100,
+                 anomaly_count : int = 2,
+                 non_anomaly_count : int = 10,
                  ):
-        self.__chance = chance
-        self.__total_chances = total_chances
+        self.__anomaly_count = anomaly_count
+        self.__non_anomaly_count = non_anomaly_count
+        self.__window_size = self.__anomaly_count + self.__non_anomaly_count
+        self.__state = 0
 
     def predict_one(self, metric: Metric) -> bool:
-        return random.randint(0, self.__total_chances) <= self.__chance
+        if self.__state < self.__anomaly_count:
+            self.__state += 1
+            return True
+        
+        self.__state = (self.__state + 1) % self.__window_size
+        return False
+        

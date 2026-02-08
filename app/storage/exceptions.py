@@ -1,0 +1,2 @@
+class UnknownStorageError(Exception):
+    pass

@@ -1,10 +1,10 @@
 import typing
 
-import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from urllib.parse import urljoin
 from requests import Session
+from omegaconf import OmegaConf
 
 from app.metrics.metric import Metric
 from app.rules.rules import Rule
@@ -64,16 +64,19 @@ class AlertManagerAlerter(Alerter):
         if endsAt != "":
             payload["endsAt"] = endsAt
 
+        body = [payload]
+        omega_conf_body = OmegaConf.create(body)
+        body = OmegaConf.to_container(omega_conf_body, resolve=True)
 
         rsp = self.__session.post(
             url=urljoin(self.url, "/api/v2/alerts"),
             headers=self.__headers,
-            json=[payload],
+            json=body,
         )
 
         if rsp.status_code != 200:
             raise AlertManagerAlerterException(
-                "HTTP Status Code {} ({!r})".format(rsp.status_code, rsp.content)
+                f"HTTP Status Code {rsp.status_code} rsp content: {rsp.content}"
             )
         
 def alert_manager_alerter_from_params_(params : dict) -> AlertManagerAlerter:

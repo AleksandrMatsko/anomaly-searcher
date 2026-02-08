@@ -12,6 +12,6 @@ class BaseAlerterConfig:
 
 def alerter_from_config(cfg : BaseAlerterConfig) -> Alerter:
     if cfg.alerter_type == AlerterType.PROMETHEUS_ALERT_MANAGER:
-        alert_manager_alerter_from_params_(cfg.alerter_params)
+        return alert_manager_alerter_from_params_(cfg.alerter_params)
 
-    raise UnknownAlerterError(f"unknown alerter {cfg.alerter_type}")
+    raise UnknownAlerterError(f"unknown alerter '{cfg.alerter_type}'")
