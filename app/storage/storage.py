@@ -7,7 +7,6 @@ from app.alert import AlertInfo
 
 class StorageType(StrEnum):
     UNKNOWN = ""
-    IN_MEMORY = "IN_MEMORY"
     REDIS = "REDIS"
 
 class ModelStorage(ABC):
@@ -26,6 +25,10 @@ class AlertInfoStorage(ABC):
 
     @abstractmethod
     def get_alert_info(self, key : str) -> (AlertInfo | None):
+        pass
+
+    @abstractmethod
+    def get_last_anomaly_start(self, key : str) -> (str | None):
         pass
 
 class Storage(ModelStorage, AlertInfoStorage):

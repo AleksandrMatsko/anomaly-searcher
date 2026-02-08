@@ -61,7 +61,7 @@ class App:
 
         return task.result()
 
-    async def __process_metrics(self, rule : rules.Rule, executor : concurrent.futures.Executor):
+    async def __process_rule_metrics(self, rule : rules.Rule, executor : concurrent.futures.Executor):
         get_metrics_task = asyncio.create_task(self.__get_metrics(rule.metric_source_type, rule.query))
         await get_metrics_task
 
@@ -76,41 +76,50 @@ class App:
         for res in results:
             is_anomaly = res.get("is_anomaly", False)
             metric = res.get("metric", None)
-            prev_info = alert.AlertInfo(started_at=(datetime.datetime.now() - datetime.timedelta(days=1)).isoformat(),
+            prev_info = alert.AlertInfo(started_at=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)).isoformat(),
                                         state=alert.AlertState.NORMAL)
-            if metric is not None:
-                new_prev_info = self.__alert_state_storage.get_alert_info(rule.id + "_" + metric.name)
-                if new_prev_info is not None:
-                    prev_info = new_prev_info
-                else:
-                    self.__alert_state_storage.save_alert_info(rule.id + "_" + metric.name, prev_info)
+            
+            if metric is None:
+                continue
+
+            key = rule.id + ":" + metric.name
+            new_prev_info = self.__alert_state_storage.get_alert_info(key)
+            if new_prev_info is not None:
+                prev_info = new_prev_info
+            else:
+                self.__alert_state_storage.save_alert_info(key, prev_info)
 
             if is_anomaly:
-                started_at = datetime.datetime.now().isoformat()
+                starts_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
                 if prev_info.state == alert.AlertState.ANOMALY:
-                    started_at = prev_info.started_at
+                    starts_at = prev_info.started_at
                 else:
                     self.__alert_state_storage.save_alert_info(
-                        key=rule.id + "_" + metric.name,
-                        info=alert.AlertInfo(started_at=started_at,
+                        key=key,
+                        info=alert.AlertInfo(started_at=starts_at,
                                              state=alert.AlertState.ANOMALY))
                 self.__logger.info(f"rule: {rule.id} metric: {metric} has anomaly")
                 self.__alerter.send_alert(rule=rule, metric=metric)
             elif not is_anomaly:
-                now = datetime.datetime.now()
-                started_at = now
+                now = datetime.datetime.now(datetime.timezone.utc)
+                ends_at = now
                 if prev_info.state == alert.AlertState.ANOMALY:
                     # alert is now recovered
                     self.__logger.info(f"rule: {rule.id} metric: {metric} recovered to normal")
                     self.__alert_state_storage.save_alert_info(
-                        key=rule.id + "_" + metric.name,
-                        info=alert.AlertInfo(started_at=started_at.isoformat(),
+                        key=key,
+                        info=alert.AlertInfo(started_at=ends_at.isoformat(),
                                             state=alert.AlertState.NORMAL))
                 else:
-                    started_at = datetime.datetime.fromisoformat(prev_info.started_at)
+                    ends_at = datetime.datetime.fromisoformat(prev_info.started_at)
 
-                if now - started_at <= datetime.timedelta(minutes=5):
-                    self.__alerter.send_alert(rule=rule, metric=metric, endsAt=started_at.isoformat())
+                if now - ends_at <= datetime.timedelta(minutes=5):
+                    alert_start = self.__alert_state_storage.get_last_anomaly_start(key)
+                    self.__alerter.send_alert(
+                        rule=rule, 
+                        metric=metric, 
+                        startsAt=alert_start if alert_start else "", 
+                        endsAt=ends_at.isoformat())
 
     def shutdown(self):
         pass
@@ -132,7 +141,7 @@ class App:
 
                     background_tasks = set()
                     for rule in rules_to_check:
-                        task = asyncio.create_task(self.__process_metrics(rule, executor))
+                        task = asyncio.create_task(self.__process_rule_metrics(rule, executor))
 
                         background_tasks.add(task)
 
