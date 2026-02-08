@@ -1,14 +1,29 @@
-redis:
-  host: "localhost"
-  port: 6379
-  username: ""
-  password: ""
+storage:
+  storage_type: REDIS
+  storage_params:
+    host: "localhost"
+    port: 6379
+    username: ""
+    password: ""
 metric_sources:
   - metric_source_type: PROMETHEUS
     metric_source_params:
       prometheus_url: "http://localhost:9090"
       timeout: 20
+alerter:
+  alerter_type: "PROMETHEUS_ALERT_MANAGER"
+  alerter_params:
+    url: "http://localhost:9093"
 rules:
   - id: test-rule-1
     metric_source_type: PROMETHEUS
+    model_type: DUMMY
+    # TODO: allow using key created out of metric labels and values, to not lose
+    # the trained model, on some label value change 
+    # (for example: new pod_name after deployment restart). 
     query: "promhttp_metric_handler_requests_total"
+    # TODO: allow expand label and annotation values with label value of metric.
+    labels:
+      test: alert
+    annotations:
+      description: test alerting rule

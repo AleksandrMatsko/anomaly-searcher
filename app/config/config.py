@@ -4,18 +4,14 @@ from omegaconf import OmegaConf, DictConfig
 
 from app.rules import Rule
 from app.metrics import BaseMetricSourceConfig
-
-@dataclass
-class RedisDBConfig:    
-    host : str = ""
-    port : int = 0
-    username : str = ""
-    password : str = ""
+from app.alert import BaseAlerterConfig
+from app.storage import BaseStorageConfig
 
 @dataclass
 class AppConfig:
-    redis : RedisDBConfig = field(default_factory=RedisDBConfig)
+    storage : BaseStorageConfig = field(default_factory=BaseStorageConfig)
     metric_sources : typing.List[BaseMetricSourceConfig] = field(default_factory=list[BaseMetricSourceConfig])
+    alerter : BaseAlerterConfig = field(default_factory=BaseAlerterConfig)
     rules : typing.List[Rule] = field(default_factory=list[Rule])
 
 def from_yaml(cfg_path : str) -> AppConfig:

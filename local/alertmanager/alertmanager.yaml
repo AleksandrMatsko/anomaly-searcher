@@ -1,0 +1,174 @@
+global:
+  telegram_api_url: "https://api.telegram.org"
+
+  http_config:
+    # Whether to enable HTTP2.
+    enable_http2: true
+    # Configure whether HTTP requests follow HTTP 3xx redirects.
+    follow_redirects: true
+
+  # ResolveTimeout is the default value used by alertmanager if the alert does
+  # not include EndsAt, after this time passes it can declare the alert as resolved if it has not been updated.
+  # This has no impact on alerts from Prometheus, as they always include EndsAt.
+  resolve_timeout: 5m
+
+# Files from which custom notification template definitions are read.
+# The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'.
+# templates:
+#   [ - <filepath> ... ]
+
+# The root node of the routing tree.
+route:
+  receiver: "personal-group-tg-notification"
+  # The labels by which incoming alerts are grouped together. For example,
+  # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+  # be batched into a single group.
+  #
+  # To aggregate by all possible labels use the special value '...' as the sole label name, for example:
+  # group_by: ['...']
+  # This effectively disables aggregation entirely, passing through all
+  # alerts as-is. This is unlikely to be what you want, unless you have
+  # a very low alert volume or your upstream notification system performs
+  # its own grouping.
+  group_by: ["alertname"]
+
+  # A list of matchers that an alert has to fulfill to match the node.
+  # If empty, matches all alerts.
+  matchers: []
+
+  # How long to wait before sending the first notification for a new group of
+  # alerts. Allows to wait for alerts to arrive from other rule groups or
+  # Prometheus servers, and for one or more inhibiting alerts to arrive and mute
+  # any target alerts before the first notification.
+  #
+  # A short group_wait will reduce the time to wait before sending the first
+  # notification for a new group of alerts. However, if group_wait is too short
+  # then the first notification might not contain the complete set of expected
+  # alerts, and alerts that should be inhibited might not be inhibited if the
+  # inhibiting alerts have not arrived in time.
+  #
+  # A long group_wait will increase the time to wait before sending the first
+  # notification for a new group of alerts. However, if group_wait is too long
+  # then notifications for firing alerts might not be sent within a reasonable
+  # time.
+  #
+  # If an alert is resolved before group_wait has elapsed, no notification will
+  # be sent for that alert. This reduces noise of flapping alerts.
+
+  # A notification for any alerts that missed the initial group_wait will be
+  # sent at the next group_interval instead.
+  #
+  # If omitted, child routes inherit the group_wait of the parent route.
+  group_wait: 30s
+
+  # How long to wait before sending subsequent notifications for an existing
+  # group of alerts after group_wait.
+  #
+  # The group_interval is a recurring timer that starts as soon as group_wait
+  # has elapsed. At each group_interval, Alertmanager checks if any new alerts
+  # have fired or any firing alerts have resolved since the last group_interval,
+  # and if they have a notification is sent. If they haven't, Alertmanager checks
+  # if the repeat_interval has elapsed instead.
+  #
+  # If omitted, child routes inherit the group_interval of the parent route.
+  group_interval: 5m
+
+  # How long to wait before repeating the last notification. Notifications are
+  # not repeated if any new alerts have fired or any firing alerts have resolved
+  # since the last group_interval.
+  #
+  # Since the repeat_interval is checked after each group_interval, it should
+  # be a multiple of the group_interval. If it's not, the repeat_interval
+  # is rounded up to the next multiple of the group_interval.
+  #
+  # In addition, if repeat_interval is longer then `--data.retention`, the
+  # notification will be repeated at the end of the data retention period
+  # instead.
+  #
+  # If omitted, child routes inherit the repeat_interval of the parent route.
+  repeat_interval: 4h
+
+  # Times when the route should be muted. These must match the name of a
+  # time interval defined in the time_intervals section.
+  # Additionally, the root node cannot have any mute times.
+  # When a route is muted it will not send any notifications, but
+  # otherwise acts normally (including ending the route-matching process
+  # if the `continue` option is not set.)
+  mute_time_intervals: []
+
+  # Times when the route should be active. These must match the name of a
+  # time interval defined in the time_intervals section. An empty value
+  # means that the route is always active.
+  # Additionally, the root node cannot have any active times.
+  # The route will send notifications only when active, but otherwise
+  # acts normally (including ending the route-matching process
+  # if the `continue` option is not set).
+  active_time_intervals: []
+
+  # Zero or more child routes.
+  routes:
+    - receiver: "personal-group-tg-notification"
+      # Whether an alert should continue matching subsequent sibling nodes.
+      continue: false
+      group_by: ["..."]
+      matchers: []
+      active_time_intervals: []
+      #  - "any-time"
+
+
+
+# A list of notification receivers.
+receivers:
+  - # The unique name of the receiver.
+    name: "personal-group-tg-notification"
+
+    # Configurations for several notification integrations.
+    telegram_configs:
+      - # Whether to notify about resolved alerts.
+        send_resolved: true
+
+        # The Telegram API URL i.e. https://api.telegram.org.
+        # If not specified, default API URL will be used.
+        # [ api_url: <string> | default = global.telegram_api_url ]
+
+        # Telegram bot token. It is mutually exclusive with `bot_token_file`.
+        # bot_token: <secret> 
+
+        # Read the Telegram bot token from a file. It is mutually exclusive with `bot_token`.
+        bot_token_file: /etc/alertmanager/tg_bot_token
+
+        # ID of the chat where to send the messages.
+        chat_id: -5081372477
+
+        # Optional ID of the message thread where to send the messages.
+        # [ message_thread_id: <int> ]
+
+        # Message template.
+        # [ message: <tmpl_string> default = '{{ template "telegram.default.message" .}}' ]
+
+        # Disable telegram notifications
+        disable_notifications: false
+
+        # Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.
+        parse_mode: "HTML"
+
+        # The HTTP client's configuration.
+        # [ http_config: <http_config> | default = global.http_config ]
+
+# A list of inhibition rules.
+inhibit_rules: []
+
+# DEPRECATED: use time_intervals below.
+# A list of mute time intervals for muting routes.
+mute_time_intervals: []
+
+# A list of time intervals for muting/activating routes.
+time_intervals:
+  - name: "any-time"
+    time_intervals:
+      - times: []
+        weekdays: []
+        days_of_month: []
+        months: []
+        years: []
+        location: "Local"

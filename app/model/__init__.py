@@ -1,9 +1,15 @@
 from .model import (
-    AnomalyDetectionModel
+    AnomalyDetectionModel,
+    pickle_model,
+    unpickle_model,
+)
+
+from .random_model import (
+    RandomAnomalyDetector,
 )
 
 from .dummy_model import (
-    DummyAnomalyDetector
+    DummyAnomalyDetector,
 )
 
 from .model_types import (

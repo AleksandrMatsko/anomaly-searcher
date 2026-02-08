@@ -1,5 +1,8 @@
+import typing
+
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
 
 from app.metrics import MetricSourceType
 from app.model import ModelType
@@ -10,6 +13,8 @@ class Rule:
     model_type : ModelType = ModelType.UNKNOWN
     query : str = ""
     id : str = ""
+    labels : typing.Dict[str, str] = field(default_factory=dict)
+    annotations : typing.Dict[str, str] = field(default_factory=dict)
 
 
 class RulesProvider(ABC):
