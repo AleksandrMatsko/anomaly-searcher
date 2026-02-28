@@ -2,6 +2,7 @@ from .model import (
     AnomalyDetectionModel,
     pickle_model,
     unpickle_model,
+    MODELS_DICT,
 )
 
 from .random_model import (
@@ -10,10 +11,6 @@ from .random_model import (
 
 from .dummy_model import (
     DummyAnomalyDetector,
-)
-
-from .model_types import (
-    ModelType
 )
 
 from .model_by_type import (

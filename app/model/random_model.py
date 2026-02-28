@@ -2,7 +2,7 @@ import random
 
 from app.metrics.metric import Metric
 
-from .model import AnomalyDetectionModel
+from .model import AnomalyDetectionModel, MODELS_DICT
 
 class RandomAnomalyDetector(AnomalyDetectionModel):
     """Randomly tells that datapoint is anomaly with probability chance / total_chances"""
@@ -18,3 +18,9 @@ class RandomAnomalyDetector(AnomalyDetectionModel):
 
     def predict_one(self, metric: Metric) -> bool:
         return random.randint(0, self.__total_chances) <= self.__chance
+    
+    @staticmethod
+    def config_name() -> str:
+        return "random"
+
+MODELS_DICT[RandomAnomalyDetector.config_name()] = lambda params: RandomAnomalyDetector(**params)
