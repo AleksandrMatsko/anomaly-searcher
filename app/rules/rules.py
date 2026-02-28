@@ -12,6 +12,7 @@ class Rule:
     model_type : str = ""
     model_params : typing.Dict[str, typing.Any] = field(default_factory=dict)
     query : str = ""
+    alias_by_label_values : typing.List[str] = field(default_factory=list)
     id : str = ""
     labels : typing.Dict[str, str] = field(default_factory=dict)
     annotations : typing.Dict[str, str] = field(default_factory=dict)

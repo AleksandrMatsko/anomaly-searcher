@@ -28,7 +28,9 @@ class PrometheusMetricSource(MetricSource):
     def __get_metric_name(self, metric_dict : dict) -> typing.Tuple[str, typing.Dict[str, str]]:
         name = metric_dict.pop("__name__")
         labels_list = []
-        labels = {}
+        labels = {
+            "__name__": name,
+        }
 
         for k in metric_dict:
             labels_list.append(f'{k}="{metric_dict[k]}"')

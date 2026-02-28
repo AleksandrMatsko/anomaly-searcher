@@ -57,6 +57,7 @@ class AlertManagerAlerter(Alerter):
 
         payload["labels"]["alertname"] = rule.id
         payload["labels"]["metric"] = metric.name
+        payload["labels"]["custom_metric_name"] = metric.custom_name(rule.alias_by_label_values)
 
         if startsAt != "":
             payload["startsAt"] = startsAt

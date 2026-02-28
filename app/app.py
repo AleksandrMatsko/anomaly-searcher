@@ -8,7 +8,6 @@ import app.config as config
 import app.rules as rules
 import app.metrics as metrics
 import app.storage as storage
-import app.model as model
 import app.alert as alert
 
 from .per_process import *
@@ -54,10 +53,17 @@ class App:
                                       executor : concurrent.futures.Executor,
                                       model_type : str,
                                       model_params : typing.Dict[str, typing.Any],
+                                      alias_by_label_values : typing.List[str],
                                       ) -> dict:
         loop = asyncio.get_running_loop()
 
-        task = loop.run_in_executor(executor, process_single_metric_task, metric, model_type, model_params)
+        task = loop.run_in_executor(
+            executor, 
+            process_single_metric_task, 
+            metric, 
+            model_type, 
+            model_params, 
+            alias_by_label_values)
         await task
 
         return task.result()
@@ -70,20 +76,29 @@ class App:
 
         metrics_list = get_metrics_task.result()
         for metric in metrics_list:
-            tasks.append(asyncio.create_task(self.__process_single_metric(metric, executor, rule.model_type, rule.model_params)))
+            tasks.append(
+                asyncio.create_task(
+                    self.__process_single_metric(
+                        metric, 
+                        executor, 
+                        rule.model_type, 
+                        rule.model_params, 
+                        rule.alias_by_label_values)
+                )
+            )
 
         results : typing.Sequence[typing.Dict[str, typing.Any]] = await asyncio.gather(*tasks, return_exceptions=False)
 
         for res in results:
             is_anomaly = res.get("is_anomaly", False)
-            metric = res.get("metric", None)
+            metric: metrics.Metric | None = res.get("metric", None)
             prev_info = alert.AlertInfo(started_at=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)).isoformat(),
                                         state=alert.AlertState.NORMAL)
             
             if metric is None:
                 continue
 
-            key = rule.id + ":" + metric.name
+            key = rule.id + ":" + metric.custom_name(rule.alias_by_label_values)
             new_prev_info = self.__alert_state_storage.get_alert_info(key)
             if new_prev_info is not None:
                 prev_info = new_prev_info

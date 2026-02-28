@@ -26,22 +26,22 @@ class Metric:
     def __str__(self):
         return self.name + "[" + ", ".join([v.__str__() for v in self.values]) + "]"
     
-    def custom_name(self, alias_by_label_keys: list = []) -> str:
+    def custom_name(self, alias_by_label_values: list = []) -> str:
         if not self.alias_support:
             return self.name
         
-        if len(alias_by_label_keys) == 0:
+        if len(alias_by_label_values) == 0:
             return self.name
-        
+
         result_name_parts = []
-        for k in alias_by_label_keys:
+        for k in alias_by_label_values:
             lv = self.labels.get(k, None)
             if lv is not None:
                 result_name_parts.append(lv)
             else:
                 raise KeyError(f"no label '{k}' in metric {self.name}")
             
-        return "_".join(result_name_parts)
+        return "-".join(result_name_parts)
         
 
 
