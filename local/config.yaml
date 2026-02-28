@@ -20,9 +20,6 @@ rules:
     model_type: dummy
     model_params:
       anomaly_count: 3
-    # TODO: allow using key created out of metric labels and values, to not lose
-    # the trained model, on some label value change 
-    # (for example: new pod_name after deployment restart). 
     query: "promhttp_metric_handler_requests_total"
     alias_by_label_values:
       - "__name__"
