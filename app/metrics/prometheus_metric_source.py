@@ -25,21 +25,23 @@ class PrometheusMetricSource(MetricSource):
         if not self.__prom.check_prometheus_connection():
             raise MetricSourceUnreachableError(MetricSourceType.PROMETHEUS)
         
-    def __get_metric_name(self, metric_dict : dict) -> str:
+    def __get_metric_name(self, metric_dict : dict) -> typing.Tuple[str, typing.Dict[str, str]]:
         name = metric_dict.pop("__name__")
-        labels = []
+        labels_list = []
+        labels = {}
 
         for k in metric_dict:
-            labels.append(f'{k}="{metric_dict[k]}"')
+            labels_list.append(f'{k}="{metric_dict[k]}"')
+            labels[k] = metric_dict[k]
 
-        return name + "{" + ",".join(labels) + "}"
+        return name + "{" + ",".join(labels_list) + "}", labels
         
         
     def __decode_into_metric_list(self, rsp : list[dict]) -> list[Metric]:
         metrics = []
 
         for d in rsp:
-            name = self.__get_metric_name(d["metric"])
+            name, labels = self.__get_metric_name(d["metric"])
 
             metric_values = []
             for v in d["values"]:
@@ -47,7 +49,12 @@ class PrometheusMetricSource(MetricSource):
                     MetricValue(v[0], float(v[1]))
                 )
 
-            metrics.append(Metric(name, metric_values))
+            metrics.append(Metric(
+                name=name, 
+                values=metric_values,
+                labels=labels,
+                alias_support=True,
+                ))
 
         return metrics
 

@@ -1,6 +1,6 @@
 from app.metrics.metric import Metric
 
-from .model import AnomalyDetectionModel
+from .model import AnomalyDetectionModel, MODELS_DICT
 
 class DummyAnomalyDetector(AnomalyDetectionModel):
     """Tells that anomaly for anomaly_count times. When tells no anomaly for non_anomaly_count times."""
@@ -25,4 +25,10 @@ class DummyAnomalyDetector(AnomalyDetectionModel):
         
         self.__state = (self.__state + 1) % self.__window_size
         return False
+    
+    @staticmethod
+    def config_name() -> str:
+        return "dummy"
+    
+MODELS_DICT[DummyAnomalyDetector.config_name()] = lambda params: DummyAnomalyDetector(**params)
         

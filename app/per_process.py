@@ -12,14 +12,15 @@ def init_model_storage_for_worker(cfg : storage.BaseStorageConfig):
     MODEL_STORAGE = storage.storage_from_cfg(cfg=cfg)
 
 def process_single_metric_task(metric : metrics.Metric, 
-                               model_type : model.ModelType,
+                               model_type : str,
+                               model_params : typing.Dict[str, typing.Any],
                                ) -> typing.Dict[str, typing.Any]:
     if MODEL_STORAGE is None:
         raise Exception(f"no initialzed MODEL_STORAGE in worker proccess {os.getpid()}")
 
     detector = MODEL_STORAGE.get_model(metric.name)
     if detector is None:
-        detector = model.get_model_by_type(model_type)
+        detector = model.get_model_by_type(model_type, model_params)
     
     is_anomaly = detector.predict_one(metric)
 

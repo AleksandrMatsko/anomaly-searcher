@@ -52,11 +52,12 @@ class App:
     async def __process_single_metric(self, 
                                       metric : metrics.Metric, 
                                       executor : concurrent.futures.Executor,
-                                      model_type : model.ModelType,
+                                      model_type : str,
+                                      model_params : typing.Dict[str, typing.Any],
                                       ) -> dict:
         loop = asyncio.get_running_loop()
 
-        task = loop.run_in_executor(executor, process_single_metric_task, metric, model_type)
+        task = loop.run_in_executor(executor, process_single_metric_task, metric, model_type, model_params)
         await task
 
         return task.result()
@@ -69,7 +70,7 @@ class App:
 
         metrics_list = get_metrics_task.result()
         for metric in metrics_list:
-            tasks.append(asyncio.create_task(self.__process_single_metric(metric, executor, rule.model_type)))
+            tasks.append(asyncio.create_task(self.__process_single_metric(metric, executor, rule.model_type, rule.model_params)))
 
         results : typing.Sequence[typing.Dict[str, typing.Any]] = await asyncio.gather(*tasks, return_exceptions=False)
 

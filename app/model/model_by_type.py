@@ -1,15 +1,10 @@
-from .model_types import ModelType
-from .model import AnomalyDetectionModel
-from .random_model import RandomAnomalyDetector
-from .dummy_model import DummyAnomalyDetector
+from .model import AnomalyDetectionModel, MODELS_DICT
 
-default_model_getter = lambda: (RandomAnomalyDetector())
+default_model_type = "dummy"
 
-def get_model_by_type(model_type : ModelType) -> AnomalyDetectionModel:
-    if model_type == ModelType.RANDOM:
-        return RandomAnomalyDetector()
+def get_model_by_type(model_type: str, params: dict = {}) -> AnomalyDetectionModel:
+    model_getter = MODELS_DICT.get(model_type, None)
+    if model_getter:
+        return model_getter(params)
     
-    if model_type == ModelType.DUMMY:
-        return DummyAnomalyDetector()
-    
-    return default_model_getter()
+    return MODELS_DICT[default_model_type](params)

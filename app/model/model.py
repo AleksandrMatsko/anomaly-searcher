@@ -1,12 +1,21 @@
 import pickle
+import typing
+
 from abc import ABC, abstractmethod
 
 import app.metrics as metrics
+
+MODELS_DICT: typing.Dict[str, typing.Callable]  = {}
 
 class AnomalyDetectionModel(ABC):
 
     @abstractmethod
     def predict_one(self, metric : metrics.Metric) -> bool:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def config_name() -> str:
         pass
 
 def pickle_model(model : AnomalyDetectionModel) -> bytes:

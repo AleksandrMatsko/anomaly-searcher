@@ -17,7 +17,9 @@ alerter:
 rules:
   - id: test-rule-1
     metric_source_type: PROMETHEUS
-    model_type: DUMMY
+    model_type: dummy
+    model_params:
+      anomaly_count: 3
     # TODO: allow using key created out of metric labels and values, to not lose
     # the trained model, on some label value change 
     # (for example: new pod_name after deployment restart). 
