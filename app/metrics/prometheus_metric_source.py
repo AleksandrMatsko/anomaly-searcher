@@ -25,8 +25,11 @@ class PrometheusMetricSource(MetricSource):
         if not self.__prom.check_prometheus_connection():
             raise MetricSourceUnreachableError(MetricSourceType.PROMETHEUS)
         
-    def __get_metric_name(self, metric_dict : dict) -> typing.Tuple[str, typing.Dict[str, str]]:
-        name = metric_dict.pop("__name__")
+    def __get_metric_name(self, metric_dict : dict, query : str) -> typing.Tuple[str, typing.Dict[str, str]]:
+        if len(metric_dict) == 0:
+            return query, {"__name__": query}
+
+        name = metric_dict.pop("__name__", query)
         labels_list = []
         labels = {
             "__name__": name,
@@ -39,11 +42,11 @@ class PrometheusMetricSource(MetricSource):
         return name + "{" + ",".join(labels_list) + "}", labels
         
         
-    def __decode_into_metric_list(self, rsp : list[dict]) -> list[Metric]:
+    def __decode_into_metric_list(self, rsp : list[dict], query : str) -> list[Metric]:
         metrics = []
 
         for d in rsp:
-            name, labels = self.__get_metric_name(d["metric"])
+            name, labels = self.__get_metric_name(d["metric"], query)
 
             metric_values = []
             for v in d["values"]:
@@ -77,7 +80,7 @@ class PrometheusMetricSource(MetricSource):
 
         res = await tsk
         
-        return self.__decode_into_metric_list(res)
+        return self.__decode_into_metric_list(res, query)
 
 def  init_prometheus_metric_source_from_cnfg_(args : dict) -> PrometheusMetricSource:
     prometheus_url = args.get("prometheus_url")

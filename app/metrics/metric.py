@@ -1,6 +1,9 @@
 import typing
+import logging
 
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class MetricValue:
@@ -39,7 +42,10 @@ class Metric:
             if lv is not None:
                 result_name_parts.append(lv)
             else:
-                raise KeyError(f"no label '{k}' in metric {self.name}")
+                logger.warning(f"metric '{self.name}' does not have label '{k}'")
+
+        if len(result_name_parts) == 0:
+            return self.name
             
         return "-".join(result_name_parts)
         
