@@ -1,0 +1,7 @@
+---
+metrics:
+  port: 9091
+metricHoleWorker:
+  timeout: "1m"
+  normalLength: 5
+  holeLength: 3
