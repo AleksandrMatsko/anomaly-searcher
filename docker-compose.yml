@@ -1,4 +1,15 @@
 services:
+  dummy_observable_app:
+    build:
+      context: ./dummy-observable-app
+      dockerfile: Dockerfile
+    ports:
+      - "9091:9091"
+    volumes:
+      - ./local/dummy-observable-app/:/etc/dummy-observable-app
+    command:
+      - --config=/etc/dummy-observable-app/config.yaml
+
   redis:
     image: redis:6.2.12-alpine3.18
     volumes:
@@ -11,6 +22,10 @@ services:
     image: prom/prometheus:v3.6.0
     ports:
       - "9090:9090"
+    volumes:
+      - ./local/prometheus/:/etc/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
 
   alertmanager:
     image: prom/alertmanager:v0.30.1
