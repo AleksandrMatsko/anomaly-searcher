@@ -12,9 +12,13 @@ App to detect anomalies in your metrics and generate alerts
 
 3. Change fiels of email receiver configuration in
 [`./local/alertmanager/alertmanager.yaml`](`./local/alertmanager/alertmanager.yaml`)
+
     3.1. Change `to` to email, on which you want to receive alerts.
+
     3.2. Change `from` to email, from which you want to send alerts.
+
     3.3. Change `smarthost` to SMTP server you are using.
+    
     3.4. Change `auth_username` to username for authorization (typically the same as `from`).
 
 4. Run
