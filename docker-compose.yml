@@ -19,7 +19,7 @@ services:
     restart: always
 
   prometheus:
-    image: prom/prometheus:v3.6.0
+    image: prom/prometheus:v3.11.0
     ports:
       - "9090:9090"
     volumes:
@@ -28,7 +28,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yaml
 
   alertmanager:
-    image: prom/alertmanager:v0.30.1
+    image: prom/alertmanager:v0.31.1
     ports:
       - "9093:9093"
     volumes:
