@@ -10,33 +10,24 @@ App to detect anomalies in your metrics and generate alerts
 
 2. Create file `./local/alertmanager/email_password` and paste password of email account into it
 
-3. Change `to` of email receiver in 
+3. Change fiels of email receiver configuration in
 [`./local/alertmanager/alertmanager.yaml`](`./local/alertmanager/alertmanager.yaml`)
-to email, on which you want to receive alerts.
+    3.1. Change `to` to email, on which you want to receive alerts.
+    3.2. Change `from` to email, from which you want to send alerts.
+    3.3. Change `smarthost` to SMTP server you are using.
+    3.4. Change `auth_username` to username for authorization (typically the same as `from`).
 
-4. Change `from` of email receiver in
-[`./local/alertmanager/alertmanager.yaml`](`./local/alertmanager/alertmanager.yaml`)
-to email, from which you want to send alerts.
-
-5. Change `smarthost` of email receiver in
-[`./local/alertmanager/alertmanager.yaml`](`./local/alertmanager/alertmanager.yaml`)
-to SMTP server you are using.
-
-6. Change `auth_username` of email receiver in
-[`./local/alertmanager/alertmanager.yaml`](`./local/alertmanager/alertmanager.yaml`)
-to username for authorization (typically the same as `from`).
-
-7. Run
+4. Run
     ```shell
     docker compose up -d
     ```
 
-8. (Optionally) Test that alertmanager well configured, by adding alert with amtool.
+5. (Optionally) Test that alertmanager well configured, by adding alert with amtool.
     ```shell
     amtool --alertmanager.url=http://localhost:9093 alert add test-alert node=bar --end={some end time in the future in RFC3339 format}
     ```
 
-9. Run
+6. Run
     ```shell
     python3 main.py -c local/config.yaml
     ```
