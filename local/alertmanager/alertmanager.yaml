@@ -19,7 +19,7 @@ global:
 
 # The root node of the routing tree.
 route:
-  receiver: "personal-group-tg-notification"
+  receiver: "via-email"
   # The labels by which incoming alerts are grouped together. For example,
   # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
   # be batched into a single group.
@@ -107,7 +107,14 @@ route:
 
   # Zero or more child routes.
   routes:
-    - receiver: "personal-group-tg-notification"
+    # - receiver: "personal-group-tg-notification"
+    #   # Whether an alert should continue matching subsequent sibling nodes.
+    #   continue: false
+    #   group_by: ["..."]
+    #   matchers: []
+    #   active_time_intervals: []
+    #   #  - "any-time"
+    - receiver: "via-email"
       # Whether an alert should continue matching subsequent sibling nodes.
       continue: false
       group_by: ["..."]
@@ -154,6 +161,35 @@ receivers:
 
         # The HTTP client's configuration.
         # [ http_config: <http_config> | default = global.http_config ]
+  
+  - name: "via-email"
+    email_configs:
+      - # Whether to notify about resolved alerts.
+        send_resolved: true
+
+        # The email address to send notifications to.
+        # Allows a comma separated list of rfc5322 compliant email addresses.
+        to: a.matsko@g.nsu.ru
+
+        # The sender's address.
+        from: anomaly-searcher@mail.ru
+
+        # The SMTP host through which emails are sent.
+        smarthost: smtp.mail.ru:465
+
+        # SMTP authentication information.
+        # auth_password and auth_password_file are mutually exclusive.
+        auth_username: anomaly-searcher@mail.ru
+        auth_password_file: /etc/alertmanager/email_password
+
+        # The SMTP TLS requirement.
+        # Note that Go does not support unencrypted connections to remote SMTP endpoints.
+        require_tls: false
+
+        # Force use of implicit TLS (direct TLS connection) for better security.
+        # true: force use of implicit TLS (direct TLS connection on any port)
+        # nil (default): auto-detect based on port (465=implicit, other=explicit) for backward compatibility
+        # implicit_tls: true
 
 # A list of inhibition rules.
 inhibit_rules: []

@@ -209,3 +209,4 @@ __marimo__/
 
 # Secrets
 local/alertmanager/tg_bot_token
+local/alertmanager/email_password
