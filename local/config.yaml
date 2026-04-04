@@ -24,6 +24,7 @@ rules:
     alias_by_label_values:
       - "__name__"
       - "code"
+      - "job"
     # TODO: allow expand label and annotation values with label value of metric.
     labels:
       test: alert
