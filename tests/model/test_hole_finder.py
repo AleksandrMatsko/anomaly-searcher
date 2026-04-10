@@ -1,7 +1,7 @@
 import pytest
 
 import app.metrics as metrics
-from app.model import HolesFinderAnomalyDetector
+from app.model import HolesFinderAnomalyDetectorWrapper, AlwaysNonAnomalyDetector
 
 testdata = [
     (metrics.Metric(
@@ -176,7 +176,8 @@ def test_predict_one(
     last_observed_ts: int,
     anomaly_expected: bool,
     ):
-    model = HolesFinderAnomalyDetector(
+    model = HolesFinderAnomalyDetectorWrapper(
+        wrapped=AlwaysNonAnomalyDetector(),
         last_observed_ts=last_observed_ts
         )
 

@@ -7,8 +7,6 @@ from .exceptions import *
 from .metric import *
 
 class PrometheusMetricSource(MetricSource):
-    __prom : pac.PrometheusConnect
-    __TIMEOUT : int
 
     def __init__(self,
                  prometheus_url : str,
@@ -42,7 +40,11 @@ class PrometheusMetricSource(MetricSource):
         return name + "{" + ",".join(labels_list) + "}", labels
         
         
-    def __decode_into_metric_list(self, rsp : list[dict], query : str) -> list[Metric]:
+    def __decode_into_metric_list(self, 
+                                  rsp : list[dict], 
+                                  query : str,
+                                  interval_end : datetime.datetime,
+                                  ) -> list[Metric]:
         metrics = []
 
         for d in rsp:
@@ -57,6 +59,7 @@ class PrometheusMetricSource(MetricSource):
             metrics.append(Metric(
                 name=name, 
                 values=metric_values,
+                queried_at=int(interval_end.timestamp()),
                 labels=labels,
                 alias_support=True,
                 ))
@@ -80,7 +83,7 @@ class PrometheusMetricSource(MetricSource):
 
         res = await tsk
         
-        return self.__decode_into_metric_list(res, query)
+        return self.__decode_into_metric_list(res, query, interval_end)
 
 def  init_prometheus_metric_source_from_cnfg_(args : dict) -> PrometheusMetricSource:
     prometheus_url = args.get("prometheus_url")

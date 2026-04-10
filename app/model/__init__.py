@@ -11,6 +11,8 @@ from .random_model import (
 
 from .dummy_model import (
     DummyAnomalyDetector,
+    AlwaysNonAnomalyDetector,
+    AlwaysAnomalyDetector,
 )
 
 from .model_by_type import (
@@ -18,5 +20,5 @@ from .model_by_type import (
 )
 
 from .find_holes import (
-    HolesFinderAnomalyDetector
+    HolesFinderAnomalyDetectorWrapper
 )
