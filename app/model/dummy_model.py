@@ -59,4 +59,3 @@ class AlwaysAnomalyDetector(AnomalyDetectionModel):
         return "always_anomaly"
     
 MODELS_DICT[AlwaysAnomalyDetector.config_name()] = lambda params: AlwaysAnomalyDetector(**params)
-        
