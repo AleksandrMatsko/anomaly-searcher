@@ -19,6 +19,7 @@ class DummyAnomalyDetector(AnomalyDetectionModel):
         self.__state = 0
 
     def predict_one(self, metric: Metric) -> bool:
+        print(f"dummy model got metric: {metric}")
         if self.__state < self.__anomaly_count:
             self.__state += 1
             return True

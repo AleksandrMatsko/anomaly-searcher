@@ -16,3 +16,7 @@ from .dummy_model import (
 from .model_by_type import (
     get_model_by_type
 )
+
+from .find_holes import (
+    HolesFinderAnomalyDetector
+)

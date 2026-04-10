@@ -1,5 +1,6 @@
 import typing
 import logging
+import datetime
 
 from dataclasses import dataclass
 
@@ -18,6 +19,7 @@ class Metric:
     def __init__(self, 
                  name : str,
                  values : list[MetricValue],
+                 queried_at : int = 0,
                  labels : typing.Dict[str, str] = {},
                  alias_support: bool = False
                  ):
@@ -25,6 +27,10 @@ class Metric:
         self.values = values
         self.labels = labels
         self.alias_support = alias_support
+        if queried_at != 0:
+            self.queried_at = queried_at
+        else:
+            self.queried_at = int(datetime.datetime.now().timestamp())
 
     def __str__(self):
         return self.name + "[" + ", ".join([v.__str__() for v in self.values]) + "]"
