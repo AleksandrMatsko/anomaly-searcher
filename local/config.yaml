@@ -15,16 +15,25 @@ alerter:
   alerter_params:
     url: "http://localhost:9093"
 rules:
-  - id: test-rule-1
+  # - id: test-rule-1
+  #   metric_source_type: PROMETHEUS
+  #   model_type: dummy
+  #   model_params:
+  #     anomaly_count: 3
+  #   query: "promhttp_metric_handler_requests_total"
+  #   alias_by_label_values:
+  #     - "__name__"
+  #     - "code"
+  #     - "job"
+  #   # TODO: allow expand label and annotation values with label value of metric.
+  #   labels:
+  #     test: alert
+  #   annotations:
+  #     description: test alerting rule
+  - id: test-holes-rule-1
     metric_source_type: PROMETHEUS
-    model_type: dummy
-    model_params:
-      anomaly_count: 3
-    query: "promhttp_metric_handler_requests_total"
-    alias_by_label_values:
-      - "__name__"
-      - "code"
-      - "job"
+    model_type: "always_non_anomaly"
+    query: "dummy_observable_app_metric_with_holes"
     # TODO: allow expand label and annotation values with label value of metric.
     labels:
       test: alert
