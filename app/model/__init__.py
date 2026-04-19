@@ -16,9 +16,13 @@ from .dummy_model import (
 )
 
 from .model_by_type import (
-    get_model_by_type
+    get_model_by_type,
 )
 
 from .find_holes import (
-    HolesFinderAnomalyDetectorWrapper
+    HolesFinderAnomalyDetectorWrapper,
+)
+
+from .best_models import (
+    VotingOf3ModelsWith2Seq,
 )

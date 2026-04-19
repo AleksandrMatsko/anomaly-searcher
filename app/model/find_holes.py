@@ -2,10 +2,9 @@ import bisect
 
 from app.metrics.metric import Metric
 
-from .model import AnomalyDetectionModel, MODELS_DICT
+from .model import AnomalyDetectionModel
 
 class HolesFinderAnomalyDetectorWrapper(AnomalyDetectionModel):
-    __last_observed_ts: int
 
     def __init__(self,
                  wrapped: AnomalyDetectionModel,
@@ -13,6 +12,7 @@ class HolesFinderAnomalyDetectorWrapper(AnomalyDetectionModel):
         self.__last_observed_ts = last_observed_ts
         self.__in_the_hole = False
         self.__wrapped = wrapped
+        self.__last_prediction = False
 
     def predict_one(self, metric: Metric) -> bool:
         first_not_observed_ts_idx = bisect.bisect(
@@ -32,12 +32,13 @@ class HolesFinderAnomalyDetectorWrapper(AnomalyDetectionModel):
                 return True
             
             self.__in_the_hole = False
-            return self.__wrapped.predict_one(metric)
+            return self.__last_prediction
         
         self.__last_observed_ts = metric.values[-1].timestamp
         self.__in_the_hole = False
 
-        return self.__wrapped.predict_one(metric)
+        self.__last_prediction = self.__wrapped.predict_one(metric)
+        return self.__last_prediction
     
     @staticmethod
     def config_name() -> str:

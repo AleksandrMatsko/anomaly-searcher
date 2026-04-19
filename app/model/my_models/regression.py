@@ -1,0 +1,136 @@
+from typing import Callable, Type, Union
+
+import pandas as pd
+import torch
+from river import base
+from river.base.typing import RegTarget
+from torch import nn, optim
+
+from deep_river.base import DeepEstimator
+
+class Regressor(DeepEstimator, base.Regressor):
+    """Incremental wrapper for PyTorch regression models.
+
+    Provides feature-incremental learning (optional) by expanding the first
+    trainable layer on-the-fly when unseen feature names are encountered.
+    Suitable for streaming / online regression tasks using the :mod:`river` API.
+
+    Parameters
+    ----------
+    module : torch.nn.Module
+        PyTorch module that outputs a numeric prediction (shape (N, 1) or (N,)).
+    loss_fn : str | Callable
+        Loss identifier or callable (e.g. ``'mse'``).
+    optimizer_fn : str | Type[torch.optim.Optimizer]
+        Optimizer spec (``'adam'``, ``'sgd'`` or optimizer class).
+    lr : float, default=1e-3
+        Learning rate.
+    is_feature_incremental : bool, default=False
+        If True, expands the input layer for new feature names.
+    device : str, default='cpu'
+        Torch device.
+    seed : int, default=42
+        Random seed for reproducibility.
+    **kwargs
+        Extra args stored for cloning/persistence.
+
+    Examples
+    --------
+        Real-world streaming regression on the Bikes dataset from :mod:`river`.
+        We retain only numeric features (discarding timestamps/strings) to build
+        dense tensors. We maintain an online MAE; the exact value may vary depending
+        on library version and hardware.
+
+    >>> import random, numpy as np
+    >>> import torch
+    >>> from torch import nn, manual_seed
+    >>> from river import datasets, metrics
+    >>> from deep_river.regression import Regressor
+    >>> _ = manual_seed(42); random.seed(42); np.random.seed(42)
+    >>> first_x, _ = next(iter(datasets.Bikes()))
+    >>> numeric_keys = sorted([k for k, v in first_x.items() if isinstance(v, (int, float))])
+    >>> class SmallNet(nn.Module):
+    ...     def __init__(self, n_features):
+    ...         super().__init__()
+    ...         self.net = nn.Sequential(
+    ...             nn.Linear(n_features, 8),
+    ...             nn.ReLU(),
+    ...             nn.Linear(8, 1)
+    ...         )
+    ...     def forward(self, x):
+    ...         return self.net(x)
+    >>> model = Regressor(module=SmallNet(len(numeric_keys)), loss_fn='mse',
+    ...                     optimizer_fn='sgd', lr=1e-2)
+    >>> mae = metrics.MAE()
+    >>> for i, (x, y) in enumerate(datasets.Bikes().take(200)):
+    ...     x_num = {k: x[k] for k in numeric_keys}
+    ...     y_pred = model.predict_one(x_num)
+    ...     model.learn_one(x_num, y)
+    ...     mae.update(y, y_pred)
+    >>> print(f"MAE: {mae.get():.4f}")  # doctest: +ELLIPSIS
+    MAE: ...
+
+    """
+
+    def __init__(
+        self,
+        module: nn.Module,
+        loss_fn: Union[str, Callable],
+        optimizer_fn: Union[str, Type[optim.Optimizer]],
+        lr: float = 0.001,
+        is_feature_incremental: bool = False,
+        device: str = "cpu",
+        seed: int = 42,
+        **kwargs,
+    ):
+        super().__init__(
+            module=module,
+            loss_fn=loss_fn,
+            optimizer_fn=optimizer_fn,
+            device=device,
+            lr=lr,
+            is_feature_incremental=is_feature_incremental,
+            seed=seed,
+            **kwargs,
+        )
+
+    def learn_one(self, x: dict, y: base.typing.RegTarget) -> None:
+        self._update_observed_features(x)
+        x_t = self._dict2tensor(x)
+        self._learn(x_t, y)
+
+    # def learn_many(self, X: pd.DataFrame, y: pd.Series) -> None:
+    #     self._update_observed_features(X)
+    #     x_t = self._df2tensor(X)
+    #     y_t = torch.tensor(y.values, dtype=torch.float32, device=self.device).view(
+    #         -1, 1
+    #     )
+    #     self._learn(x_t, y_t)
+
+    def predict_one(self, x: dict) -> RegTarget:
+        """Predict target value for a single instance."""
+        self._update_observed_features(x)
+        x_t = self._dict2tensor(x)
+        self.module.eval()
+        with torch.no_grad():
+            y_pred = self.module(x_t).item()
+        return y_pred
+
+    # def predict_many(self, X: pd.DataFrame) -> pd.DataFrame:
+    #     """Predict target values for multiple instances (returns single-column DataFrame)."""
+    #     self._update_observed_features(X)
+    #     x_t = self._df2tensor(X)
+    #     self.module.eval()
+    #     with torch.inference_mode():
+    #         y_preds = self.module(x_t)
+    #     return pd.DataFrame(y_preds if not y_preds.is_cuda else y_preds.cpu().numpy())
+
+    # @classmethod
+    # def _unit_test_params(cls):
+    #     """Provides default parameters for unit testing."""
+    #     yield {
+    #         "module": _TestModule(10),
+    #         "loss_fn": "binary_cross_entropy_with_logits",
+    #         "optimizer_fn": "sgd",
+    #         "is_feature_incremental": False,
+    #     }
