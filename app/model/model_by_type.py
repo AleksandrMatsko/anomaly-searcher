@@ -1,7 +1,7 @@
 from .model import AnomalyDetectionModel, MODELS_DICT
 from .find_holes import HolesFinderAnomalyDetectorWrapper
 
-default_model_type = "dummy"
+default_model_type = "voting_of_3_models_with_2_seq"
 
 def get_model_by_type(model_type: str, params: dict = {}) -> AnomalyDetectionModel:
     model_getter = MODELS_DICT.get(model_type, None)

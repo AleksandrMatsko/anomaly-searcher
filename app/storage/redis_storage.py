@@ -1,5 +1,6 @@
 import pickle
 import redis
+import typing
 
 from dataclasses import dataclass
 
@@ -21,14 +22,17 @@ class RedisStorage(ModelStorage, AlertInfoStorage):
     __ALERT_INFO_PATH : str = "alert_info"
     __LAST_ANOMALY_START_PATH : str = "last_anomaly_start"
 
-    def __init__(self, cfg : RedisDBConfig):
-        self.__redis = redis.Redis(
-            decode_responses=False,
-            host=cfg.host,
-            port=cfg.port,
-            username=cfg.username,
-            password=cfg.password,
-        )
+    def __init__(self, cfg : RedisDBConfig, redis_client: redis.Redis | None = None ):
+        if redis_client:
+            self.__redis = redis_client
+        else:
+            self.__redis = redis.Redis(
+                decode_responses=False,
+                host=cfg.host,
+                port=cfg.port,
+                username=cfg.username,
+                password=cfg.password,
+            )
 
     def __model_key(self, key : str) -> str:
         return self.__MODELS_PATH+":"+key

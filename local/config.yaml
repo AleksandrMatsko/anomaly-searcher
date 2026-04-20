@@ -32,7 +32,7 @@ rules:
   #     description: test alerting rule
   - id: test-holes-rule-1
     metric_source_type: PROMETHEUS
-    model_type: "always_non_anomaly"
+    model_type: "voting_of_3_models_with_2_seq"
     query: "dummy_observable_app_metric_with_holes"
     # TODO: allow expand label and annotation values with label value of metric.
     labels:
