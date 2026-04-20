@@ -7,18 +7,16 @@ from .model import AnomalyDetectionModel, MODELS_DICT
 import river.time_series as ts
 import river.anomaly as anomaly
 
-def create_ILOF(n_neighbors : int):
-    return anomaly.LocalOutlierFactor(n_neighbors=n_neighbors)
-
-def create_ILOF_with_7_neighbors():
-    return anomaly.LocalOutlierFactor(n_neighbors=7)
+def create_ILOF(params: dict):
+    return anomaly.LocalOutlierFactor(**params)
 
 def average(l: list[float]) -> float:
     return sum(l) / len(l)
 
-def create_RollingILOF(n_neighbors:int):
+def create_RollingILOF(ilof_params: dict):
     return my_models.RollingModel(
-        model_create_func=create_ILOF_with_7_neighbors,
+        model_create_func=create_ILOF,
+        model_params=ilof_params,
         num_models=5,
         model_ttl=100,
         time_shift=20,
@@ -54,14 +52,14 @@ class VotingOf3ModelsWith2Seq(AnomalyDetectionModel):
                 models=[
                     my_models.wrap_with_rolling_filter(my_models.SequenceModel(
                         models=[
-                            create_RollingILOF(7),  
+                            create_RollingILOF({"n_neighbors": 7}),  
                             my_models.wrap_with_PDA(holt_winters),
                         ],
                         y_key="now-0"
                     ), True),
                     my_models.wrap_with_rolling_filter(my_models.SequenceModel(
                         models=[
-                            create_RollingILOF(7),  
+                            create_RollingILOF({"n_neighbors": 7}),  
                             my_models.Autoencoder(
                                 n_features=1,
                                 hidden_size=1,
