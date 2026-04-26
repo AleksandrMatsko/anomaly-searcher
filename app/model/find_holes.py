@@ -43,3 +43,6 @@ class HolesFinderAnomalyDetectorWrapper(AnomalyDetectionModel):
     @staticmethod
     def config_name() -> str:
         return "holes_finder_wrapper"
+    
+    def model_type(self) -> str:
+        return self.__wrapped.model_type()

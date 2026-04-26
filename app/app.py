@@ -138,11 +138,15 @@ class App:
         self.__logger.info("starting app...")
 
         with concurrent.futures.ProcessPoolExecutor(
+            max_workers=self.__cfg.max_workers,
             initializer=init_model_storage_for_worker,
             initargs=(self.__cfg.storage,),
         ) as executor:
             try:
                 while True:
+                    # TODO: move sleep delay to config.
+                    sleep_task = asyncio.sleep(60)
+                    
                     task = asyncio.create_task(self.__get_rules())
                     await task
 
@@ -157,8 +161,8 @@ class App:
 
                         task.add_done_callback(background_tasks.discard)
 
-                    # TODO: move sleep delay to config.
-                    await asyncio.sleep(60)
+                    await sleep_task
+                    
             except asyncio.CancelledError:
                 self.__logger.info("cancelled")
             finally:

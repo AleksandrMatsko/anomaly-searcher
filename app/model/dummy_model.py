@@ -30,6 +30,9 @@ class DummyAnomalyDetector(AnomalyDetectionModel):
     def config_name() -> str:
         return "dummy"
     
+    def model_type(self) -> str:
+        return "dummy"
+    
 MODELS_DICT[DummyAnomalyDetector.config_name()] = lambda params: DummyAnomalyDetector(**params)
 
 class AlwaysNonAnomalyDetector(AnomalyDetectionModel):
@@ -42,6 +45,9 @@ class AlwaysNonAnomalyDetector(AnomalyDetectionModel):
     
     @staticmethod
     def config_name() -> str:
+        return "always_non_anomaly"
+    
+    def model_type(self) -> str:
         return "always_non_anomaly"
     
 MODELS_DICT[AlwaysNonAnomalyDetector.config_name()] = lambda params: AlwaysNonAnomalyDetector(**params)
@@ -57,5 +63,8 @@ class AlwaysAnomalyDetector(AnomalyDetectionModel):
     @staticmethod
     def config_name() -> str:
         return "always_anomaly"
+    
+    def model_type(self) -> str:
+        return self.__class__.config_name()
     
 MODELS_DICT[AlwaysAnomalyDetector.config_name()] = lambda params: AlwaysAnomalyDetector(**params)

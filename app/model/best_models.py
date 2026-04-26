@@ -95,4 +95,7 @@ class VotingOf3ModelsWith2Seq(AnomalyDetectionModel):
     def config_name() -> str:
         return "voting_of_3_models_with_2_seq"
     
+    def model_type(self) -> str:
+        return self.__class__.config_name()
+    
 MODELS_DICT[VotingOf3ModelsWith2Seq.config_name()] = lambda params: VotingOf3ModelsWith2Seq(**params)

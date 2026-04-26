@@ -18,6 +18,10 @@ class AnomalyDetectionModel(ABC):
     def config_name() -> str:
         pass
 
+    @abstractmethod
+    def model_type(self) -> str:
+        pass
+
 def pickle_model(model : AnomalyDetectionModel) -> bytes:
     return pickle.dumps(model)
 

@@ -9,6 +9,7 @@ from app.storage import BaseStorageConfig
 
 @dataclass
 class AppConfig:
+    max_workers : int | None = None
     storage : BaseStorageConfig = field(default_factory=BaseStorageConfig)
     metric_sources : typing.List[BaseMetricSourceConfig] = field(default_factory=list[BaseMetricSourceConfig])
     alerter : BaseAlerterConfig = field(default_factory=BaseAlerterConfig)

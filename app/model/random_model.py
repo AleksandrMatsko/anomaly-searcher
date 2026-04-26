@@ -22,5 +22,8 @@ class RandomAnomalyDetector(AnomalyDetectionModel):
     @staticmethod
     def config_name() -> str:
         return "random"
+    
+    def model_type(self) -> str:
+        return RandomAnomalyDetector.config_name()
 
 MODELS_DICT[RandomAnomalyDetector.config_name()] = lambda params: RandomAnomalyDetector(**params)

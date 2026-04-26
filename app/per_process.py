@@ -23,6 +23,11 @@ def process_single_metric_task(metric : metrics.Metric,
     if detector is None:
         detector = model.get_model_by_type(rule.model_type, rule.model_params)
     
+    if detector.model_type() != rule.model_type:
+        # model in rule has changed,
+        # so we have to change model in storage
+        detector = model.get_model_by_type(rule.model_type, rule.model_params)
+    
     is_anomaly = detector.predict_one(metric)
 
     MODEL_STORAGE.save_model(key, detector)
