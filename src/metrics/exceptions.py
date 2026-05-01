@@ -40,6 +40,10 @@ class MetricSourceDuplicationError(Exception):
 
 class MetricSourceUnreachableError(Exception):
 
-    def __init__(self, metric_source_type : MetricSourceType):
+    def __init__(self, metric_source_type : MetricSourceType, e: Exception | None = None):
         self.metric_source_type = metric_source_type
-        super().__init__(f"metric source of type {self.metric_source_type} is unreachable")
+        self.e = e
+        msg = f"metric source of type {self.metric_source_type} is unreachable."
+        if e is not None:
+            msg += f" Caused by: {e}"
+        super().__init__(msg)

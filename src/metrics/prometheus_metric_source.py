@@ -6,6 +6,9 @@ from .metric_source import MetricSource, MetricSourceType
 from .exceptions import *
 from .metric import *
 
+from urllib3.exceptions import MaxRetryError
+from requests.exceptions import ConnectionError
+
 class PrometheusMetricSource(MetricSource):
 
     def __init__(self,
@@ -20,8 +23,11 @@ class PrometheusMetricSource(MetricSource):
             headers=headers,
         )
         self.__TIMEOUT = timeout
-        if not self.__prom.check_prometheus_connection():
-            raise MetricSourceUnreachableError(MetricSourceType.PROMETHEUS)
+        try:
+            if not self.__prom.check_prometheus_connection():
+                raise MetricSourceUnreachableError(MetricSourceType.PROMETHEUS)
+        except (ConnectionError, MaxRetryError) as e:
+                raise MetricSourceUnreachableError(MetricSourceType.PROMETHEUS, e)
         
     def __get_metric_name(self, metric_dict : dict, query : str) -> typing.Tuple[str, typing.Dict[str, str]]:
         if len(metric_dict) == 0:
