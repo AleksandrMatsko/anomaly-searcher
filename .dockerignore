@@ -1,0 +1,6 @@
+local
+!local/config.yaml
+
+.git
+tests
+dummy-observable-app
