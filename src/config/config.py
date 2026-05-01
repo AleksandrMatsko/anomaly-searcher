@@ -2,10 +2,10 @@ from dataclasses import dataclass, field
 import typing
 from omegaconf import OmegaConf, DictConfig
 
-from app.rules import Rule
-from app.metrics import BaseMetricSourceConfig
-from app.alert import BaseAlerterConfig
-from app.storage import BaseStorageConfig
+from src.rules import Rule
+from src.metrics import BaseMetricSourceConfig
+from src.alert import BaseAlerterConfig
+from src.storage import BaseStorageConfig
 
 @dataclass
 class AppConfig:

@@ -1,7 +1,7 @@
 import pytest
 
-import app.metrics as metrics
-from app.model import HolesFinderAnomalyDetectorWrapper, AlwaysNonAnomalyDetector
+import src.metrics as metrics
+from src.model import HolesFinderAnomalyDetectorWrapper, AlwaysNonAnomalyDetector
 
 testdata = [
     (metrics.Metric(

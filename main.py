@@ -1,6 +1,6 @@
 import argparse
-import app
-import app.config
+import src
+import src.config
 import asyncio
 import logging
 
@@ -17,8 +17,8 @@ async def main():
         help="path to configuration file")
     opts = vars(parser.parse_args())
 
-    app_conf = app.config.from_yaml(opts["config"])
-    app_to_run = app.App(app_conf)
+    app_conf = src.config.from_yaml(opts["config"])
+    app_to_run = src.App(app_conf)
 
     logging.getLogger(__name__).info("app initialized")
 

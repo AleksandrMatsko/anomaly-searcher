@@ -3,7 +3,7 @@ import typing
 
 from abc import ABC, abstractmethod
 
-import app.metrics as metrics
+import src.metrics as metrics
 
 MODELS_DICT: typing.Dict[str, typing.Callable]  = {}
 

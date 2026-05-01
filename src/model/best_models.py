@@ -1,7 +1,7 @@
 import bisect
 from . import my_models as my_models
 
-from app.metrics.metric import Metric
+from src.metrics.metric import Metric
 from .model import AnomalyDetectionModel, MODELS_DICT
 
 import river.time_series as ts

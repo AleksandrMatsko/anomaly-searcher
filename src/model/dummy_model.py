@@ -1,4 +1,4 @@
-from app.metrics.metric import Metric
+from src.metrics.metric import Metric
 
 from .model import AnomalyDetectionModel, MODELS_DICT
 

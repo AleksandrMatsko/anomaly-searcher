@@ -4,8 +4,8 @@ import typing
 
 from dataclasses import dataclass
 
-from app.model.model import AnomalyDetectionModel, pickle_model, unpickle_model
-from app.alert import AlertInfo, AlertState
+from src.model.model import AnomalyDetectionModel, pickle_model, unpickle_model
+from src.alert import AlertInfo, AlertState
 
 from .storage import *
 

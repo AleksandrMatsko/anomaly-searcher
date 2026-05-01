@@ -4,11 +4,11 @@ import logging
 import typing
 import datetime
 
-import app.config as config
-import app.rules as rules
-import app.metrics as metrics
-import app.storage as storage
-import app.alert as alert
+import src.config as config
+import src.rules as rules
+import src.metrics as metrics
+import src.storage as storage
+import src.alert as alert
 
 from .per_process import *
 

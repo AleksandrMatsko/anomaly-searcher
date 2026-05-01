@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 
-from app.metrics import MetricSourceType
+from src.metrics import MetricSourceType
 
 @dataclass
 class Rule:

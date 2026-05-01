@@ -1,10 +1,10 @@
 import typing
 import os
 
-import app.metrics as metrics
-import app.storage as storage
-import app.model as model
-import app.rules as rules
+import src.metrics as metrics
+import src.storage as storage
+import src.model as model
+import src.rules as rules
 
 MODEL_STORAGE = None
 
