@@ -3,7 +3,7 @@ import typing
 
 from abc import ABC, abstractmethod
 
-import app.metrics as metrics
+import src.metrics as metrics
 
 MODELS_DICT: typing.Dict[str, typing.Callable]  = {}
 
@@ -16,6 +16,10 @@ class AnomalyDetectionModel(ABC):
     @staticmethod
     @abstractmethod
     def config_name() -> str:
+        pass
+
+    @abstractmethod
+    def model_type(self) -> str:
         pass
 
 def pickle_model(model : AnomalyDetectionModel) -> bytes:

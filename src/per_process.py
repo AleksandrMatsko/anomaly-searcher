@@ -1,10 +1,10 @@
 import typing
 import os
 
-import app.metrics as metrics
-import app.storage as storage
-import app.model as model
-import app.rules as rules
+import src.metrics as metrics
+import src.storage as storage
+import src.model as model
+import src.rules as rules
 
 MODEL_STORAGE = None
 
@@ -21,6 +21,11 @@ def process_single_metric_task(metric : metrics.Metric,
     key = f"{rule.id}:{metric.custom_name(alias_by_label_values=rule.alias_by_label_values)}"
     detector = MODEL_STORAGE.get_model(key)
     if detector is None:
+        detector = model.get_model_by_type(rule.model_type, rule.model_params)
+    
+    if detector.model_type() != rule.model_type:
+        # model in rule has changed,
+        # so we have to change model in storage
         detector = model.get_model_by_type(rule.model_type, rule.model_params)
     
     is_anomaly = detector.predict_one(metric)

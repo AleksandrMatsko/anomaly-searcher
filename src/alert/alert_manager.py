@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 from requests import Session
 from omegaconf import OmegaConf
 
-from app.metrics.metric import Metric
-from app.rules.rules import Rule
+from src.metrics.metric import Metric
+from src.rules.rules import Rule
 
 from .alert import Alerter
 from .exceptions import *

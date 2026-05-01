@@ -1,9 +1,9 @@
 import pytest
 from testcontainers.redis import RedisContainer
 
-import app.metrics as metrics
-from app.model import VotingOf3ModelsWith2Seq, pickle_model, unpickle_model
-from app.storage import RedisStorage, RedisDBConfig
+import src.metrics as metrics
+from src.model import VotingOf3ModelsWith2Seq, pickle_model, unpickle_model
+from src.storage import RedisStorage, RedisDBConfig
 
 def test_model_is_pickled_and_unpickled():
     metric = metrics.Metric(

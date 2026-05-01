@@ -2,13 +2,14 @@ from dataclasses import dataclass, field
 import typing
 from omegaconf import OmegaConf, DictConfig
 
-from app.rules import Rule
-from app.metrics import BaseMetricSourceConfig
-from app.alert import BaseAlerterConfig
-from app.storage import BaseStorageConfig
+from src.rules import Rule
+from src.metrics import BaseMetricSourceConfig
+from src.alert import BaseAlerterConfig
+from src.storage import BaseStorageConfig
 
 @dataclass
 class AppConfig:
+    max_workers : int | None = None
     storage : BaseStorageConfig = field(default_factory=BaseStorageConfig)
     metric_sources : typing.List[BaseMetricSourceConfig] = field(default_factory=list[BaseMetricSourceConfig])
     alerter : BaseAlerterConfig = field(default_factory=BaseAlerterConfig)

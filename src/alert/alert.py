@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from dataclasses import dataclass
 
-import app.rules as rules
-import app.metrics as metrics
+import src.rules as rules
+import src.metrics as metrics
 
 class AlerterType(StrEnum):
     UNKNOWN = ""

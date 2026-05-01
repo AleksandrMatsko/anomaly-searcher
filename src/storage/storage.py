@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from dataclasses import dataclass
 
-from app.model import AnomalyDetectionModel
-from app.alert import AlertInfo
+from src.model import AnomalyDetectionModel
+from src.alert import AlertInfo
 
 class StorageType(StrEnum):
     UNKNOWN = ""
